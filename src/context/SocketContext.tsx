@@ -44,7 +44,9 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     }
     if (user) {
       // Establish connection when user logs in
-      const newSocket = io('http://localhost:5000');
+      const newSocket = io(import.meta.env.VITE_API_BASE_URL, {
+          transports: ['websocket'] // Explicitly use websockets for better reliability
+      });
       setSocket(newSocket);
 
       // Join a personal room for notifications
