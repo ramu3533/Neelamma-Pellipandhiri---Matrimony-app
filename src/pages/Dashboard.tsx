@@ -65,11 +65,11 @@ const Dashboard = () => {
       const config = { headers: { Authorization: `Bearer ${token}` } };
       try {
         const [myProfileRes, receivedRes, sentRes, acceptedRes, likesRes] = await Promise.all([
-          axios.get('${import.meta.env.VITE_API_BASE_URL}/api/profiles/me', config),
-          axios.get('${import.meta.env.VITE_API_BASE_URL}/api/interests/received', config),
-          axios.get('${import.meta.env.VITE_API_BASE_URL}/api/interests/sent', config),
-          axios.get('${import.meta.env.VITE_API_BASE_URL}/api/interests/accepted', config),
-          axios.get('${import.meta.env.VITE_API_BASE_URL}/api/likes/received', config),
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/profiles/me`, config),
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/interests/received`, config),
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/interests/sent`, config),
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/interests/accepted`, config),
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/likes/received`, config),
         ]);
         setMyProfile(myProfileRes.data);
         setReceivedInterests(receivedRes.data);
@@ -114,7 +114,7 @@ const Dashboard = () => {
     setImageToCrop(null);
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post('${import.meta.env.VITE_API_BASE_URL}/api/profiles/picture', formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` } });
+      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/profiles/picture`, formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` } });
       setMyProfile(prev => prev ? { ...prev, image: res.data.image } : null);
       setStatusMessage({ type: 'success', text: res.data.message });
     } catch (err: any) { setStatusMessage({ type: 'error', text: err.response?.data?.message || 'Upload failed.' }); }
@@ -128,7 +128,7 @@ const Dashboard = () => {
     setStatusMessage({ type: 'info', text: 'Uploading to gallery...' });
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post('${import.meta.env.VITE_API_BASE_URL}/api/profiles/images', formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` } });
+      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/profiles/images`, formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` } });
       setMyProfile(prev => prev ? { ...prev, images: res.data.images } : null);
       setStatusMessage({ type: 'success', text: res.data.message });
       const fileInput = document.getElementById('gallery-upload') as HTMLInputElement;
@@ -151,7 +151,7 @@ const Dashboard = () => {
     setStatusMessage({ type: 'info', text: 'Setting profile picture...' });
     try {
         const token = localStorage.getItem('token');
-        const res = await axios.put('${import.meta.env.VITE_API_BASE_URL}/api/profiles/picture', { imageUrl }, { headers: { Authorization: `Bearer ${token}` } });
+        const res = await axios.put(`${import.meta.env.VITE_API_BASE_URL}/api/profiles/picture`, { imageUrl }, { headers: { Authorization: `Bearer ${token}` } });
         setMyProfile(prev => prev ? { ...prev, image: res.data.image } : null);
         setStatusMessage({ type: 'success', text: res.data.message });
     } catch (error) { setStatusMessage({ type: 'error', text: 'Failed to set profile picture.' }); }
@@ -182,7 +182,7 @@ const Dashboard = () => {
     setStatusMessage({ type: 'info', text: 'Saving...' });
     try {
       const token = localStorage.getItem('token');
-      await axios.put('${import.meta.env.VITE_API_BASE_URL}/api/profiles/interests', { interests: myProfile.interests }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.put(`${import.meta.env.VITE_API_BASE_URL}/api/profiles/interests`, { interests: myProfile.interests }, { headers: { Authorization: `Bearer ${token}` } });
       setStatusMessage({ type: 'success', text: "Interests saved successfully." });
     } catch (err: any) { setStatusMessage({ type: 'error', text: err.response?.data?.message || 'Failed to save.' }); }
   };
