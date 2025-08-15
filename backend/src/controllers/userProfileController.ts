@@ -3,6 +3,24 @@ import pool from '../config/db';
 import { AuthRequest } from '../middleware/authMiddleware';
 import fs from 'fs';
 import path from 'path';
+import sharp from 'sharp';
+
+
+const processImage = async (file: Express.Multer.File) => {
+  const newFilename = `${file.fieldname}-${Date.now()}.webp`;
+  const newPath = path.join('uploads/', newFilename);
+
+  await sharp(file.path)
+    .resize(800, 800, { fit: 'cover' }) // Resize to a max of 800x800
+    .toFormat('webp')                 // Convert to modern, efficient WebP format
+    .webp({ quality: 80 })            // Set WebP quality
+    .toFile(newPath);
+
+  // Delete the original temporary file
+  fs.unlinkSync(file.path);
+
+  return newPath.replace(/\\/g, "/"); // Return the new, optimized path
+};
 
 // Get the logged-in user's own complete profile for the dashboard
 export const getMyProfile = async (req: AuthRequest, res: Response) => {
@@ -41,11 +59,13 @@ export const uploadMainProfilePicture = async (req: AuthRequest, res: Response) 
     if (!req.file) {
         return res.status(400).json({ message: 'Please upload a file.' });
     }
-    const imageUrl = req.file.path.replace(/\\/g, "/");
+    
     try {
+        const optimizedImageUrl = await processImage(req.file);
+        
         const result = await pool.query(
             'UPDATE profiles SET image = $1 WHERE user_id = $2 RETURNING image',
-            [imageUrl, userId]
+            [optimizedImageUrl, userId]
         );
         res.status(200).json({
             message: 'Profile picture updated successfully.',
@@ -91,15 +111,14 @@ export const uploadProfileImages = async (req: AuthRequest, res: Response) => {
   try {
     await client.query('BEGIN');
     for (const file of files) {
-      const imageUrl = file.path.replace(/\\/g, "/");
+      const optimizedImageUrl = await processImage(file);
       await client.query(
         'INSERT INTO profile_images (user_id, image_url) VALUES ($1, $2)',
-        [userId, imageUrl]
+        [userId, optimizedImageUrl]
       );
     }
     await client.query('COMMIT');
 
-    // Return the new list of all images for the user
     const newImages = await client.query('SELECT image_id, image_url FROM profile_images WHERE user_id = $1 ORDER BY created_at DESC', [userId]);
     res.status(201).json({
         message: 'Images uploaded successfully',
@@ -113,7 +132,6 @@ export const uploadProfileImages = async (req: AuthRequest, res: Response) => {
     client.release();
   }
 };
-
 // Delete a single profile image from the gallery
 export const deleteProfileImage = async (req: AuthRequest, res: Response) => {
     const userId = req.user?.id;
