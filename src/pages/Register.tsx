@@ -28,7 +28,7 @@ const Register = () => {
     setIsLoading(true);
     try {
       // Step 1: Send registration data to the backend.
-      const res = await axios.post('${import.meta.env.VITE_API_BASE_URL}/api/auth/register', formData);
+      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/auth/register`, formData);
       
       // Step 2: On success, navigate to the OTP verification page.
       // Pass the email and the purpose to the next page.
