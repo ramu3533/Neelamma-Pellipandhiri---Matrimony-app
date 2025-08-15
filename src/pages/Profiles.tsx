@@ -79,10 +79,10 @@ const Profiles = () => {
       try {
         const [profilesRes, allProfilesRes, sentInterestsRes, sentLikesRes] =
           await Promise.all([
-            axios.get("http://localhost:5000/api/profiles", config),
-            axios.get("http://localhost:5000/api/profiles/all", config),
-            axios.get("http://localhost:5000/api/interests/sent", config),
-            axios.get("http://localhost:5000/api/likes/sent", config),
+            axios.get("${import.meta.env.VITE_API_BASE_URL}/api/profiles", config),
+            axios.get("${import.meta.env.VITE_API_BASE_URL}/api/profiles/all", config),
+            axios.get("${import.meta.env.VITE_API_BASE_URL}/api/interests/sent", config),
+            axios.get("${import.meta.env.VITE_API_BASE_URL}/api/likes/sent", config),
           ]);
 
         // DEFINITIVE FIX: Ensure the current user is filtered out from all lists immediately after fetch.
@@ -163,7 +163,7 @@ const Profiles = () => {
     const token = localStorage.getItem("token");
     try {
       const res = await axios.get<FullProfile>(
-        `http://localhost:5000/api/profiles/${userId}`,
+        `${import.meta.env.VITE_API_BASE_URL}/api/profiles/${userId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setViewingProfile(res.data);
@@ -180,7 +180,7 @@ const Profiles = () => {
     const token = localStorage.getItem("token");
     try {
       await axios.post(
-        `http://localhost:5000/api/likes/${likedUserId}`,
+        `${import.meta.env.VITE_API_BASE_URL}/api/likes/${likedUserId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -201,7 +201,7 @@ const Profiles = () => {
     const token = localStorage.getItem("token");
     try {
       const res = await axios.post<Interest>(
-        "http://localhost:5000/api/interests/send",
+        "${import.meta.env.VITE_API_BASE_URL}/api/interests/send",
         { receiverId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -363,7 +363,7 @@ const Profiles = () => {
                 >
                   {profile.image ? (
                     <img
-                      src={`http://localhost:5000/${profile.image}`}
+                      src={`${import.meta.env.VITE_API_BASE_URL}/${profile.image}`}
                       alt={profile.name}
                       className="absolute inset-0 w-full h-full object-contain"
                     />
