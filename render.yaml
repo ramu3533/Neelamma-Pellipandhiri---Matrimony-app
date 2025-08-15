@@ -15,7 +15,7 @@ services:
     # Tell Render where the backend code is
     rootDir: ./backend
     # Commands for Render to run
-    buildCommand: npm install && npm run build
+    buildCommand: npm install && npx vite build
     startCommand: node dist/server.js
     # Environment variables for the backend
     envVars:
