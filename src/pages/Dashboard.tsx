@@ -65,11 +65,11 @@ const Dashboard = () => {
       const config = { headers: { Authorization: `Bearer ${token}` } };
       try {
         const [myProfileRes, receivedRes, sentRes, acceptedRes, likesRes] = await Promise.all([
-          axios.get('http://localhost:5000/api/profiles/me', config),
-          axios.get('http://localhost:5000/api/interests/received', config),
-          axios.get('http://localhost:5000/api/interests/sent', config),
-          axios.get('http://localhost:5000/api/interests/accepted', config),
-          axios.get('http://localhost:5000/api/likes/received', config),
+          axios.get('${import.meta.env.VITE_API_BASE_URL}/api/profiles/me', config),
+          axios.get('${import.meta.env.VITE_API_BASE_URL}/api/interests/received', config),
+          axios.get('${import.meta.env.VITE_API_BASE_URL}/api/interests/sent', config),
+          axios.get('${import.meta.env.VITE_API_BASE_URL}/api/interests/accepted', config),
+          axios.get('${import.meta.env.VITE_API_BASE_URL}/api/likes/received', config),
         ]);
         setMyProfile(myProfileRes.data);
         setReceivedInterests(receivedRes.data);
@@ -114,7 +114,7 @@ const Dashboard = () => {
     setImageToCrop(null);
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post('http://localhost:5000/api/profiles/picture', formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` } });
+      const res = await axios.post('${import.meta.env.VITE_API_BASE_URL}/api/profiles/picture', formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` } });
       setMyProfile(prev => prev ? { ...prev, image: res.data.image } : null);
       setStatusMessage({ type: 'success', text: res.data.message });
     } catch (err: any) { setStatusMessage({ type: 'error', text: err.response?.data?.message || 'Upload failed.' }); }
@@ -128,7 +128,7 @@ const Dashboard = () => {
     setStatusMessage({ type: 'info', text: 'Uploading to gallery...' });
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.post('http://localhost:5000/api/profiles/images', formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` } });
+      const res = await axios.post('${import.meta.env.VITE_API_BASE_URL}/api/profiles/images', formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` } });
       setMyProfile(prev => prev ? { ...prev, images: res.data.images } : null);
       setStatusMessage({ type: 'success', text: res.data.message });
       const fileInput = document.getElementById('gallery-upload') as HTMLInputElement;
@@ -141,7 +141,7 @@ const Dashboard = () => {
     if (!window.confirm("Are you sure you want to delete this image?")) return;
     try {
         const token = localStorage.getItem('token');
-        await axios.delete(`http://localhost:5000/api/profiles/images/${imageId}`, { headers: { Authorization: `Bearer ${token}` } });
+        await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/profiles/images/${imageId}`, { headers: { Authorization: `Bearer ${token}` } });
         setMyProfile(prev => prev ? { ...prev, images: prev.images.filter(img => img.image_id !== imageId) } : null);
         setStatusMessage({ type: 'success', text: 'Image deleted.' });
     } catch (error) { setStatusMessage({ type: 'error', text: 'Failed to delete image.' }); }
@@ -151,7 +151,7 @@ const Dashboard = () => {
     setStatusMessage({ type: 'info', text: 'Setting profile picture...' });
     try {
         const token = localStorage.getItem('token');
-        const res = await axios.put('http://localhost:5000/api/profiles/picture', { imageUrl }, { headers: { Authorization: `Bearer ${token}` } });
+        const res = await axios.put('${import.meta.env.VITE_API_BASE_URL}/api/profiles/picture', { imageUrl }, { headers: { Authorization: `Bearer ${token}` } });
         setMyProfile(prev => prev ? { ...prev, image: res.data.image } : null);
         setStatusMessage({ type: 'success', text: res.data.message });
     } catch (error) { setStatusMessage({ type: 'error', text: 'Failed to set profile picture.' }); }
@@ -160,7 +160,7 @@ const Dashboard = () => {
   const handleViewProfile = async (userId: number) => {
     const token = localStorage.getItem('token');
     try {
-      const res = await axios.get<MyProfile>(`http://localhost:5000/api/profiles/${userId}`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.get<MyProfile>(`${import.meta.env.VITE_API_BASE_URL}/api/profiles/${userId}`, { headers: { Authorization: `Bearer ${token}` } });
       setSelectedProfile(res.data);
     } catch (error) { console.error("Failed to fetch profile details", error); }
   };
@@ -169,7 +169,7 @@ const Dashboard = () => {
   const handleOpenChat = async (targetUser: { id: number; name: string; }) => {
     const token = localStorage.getItem('token');
     try {
-      const res = await axios.get(`http://localhost:5000/api/conversations/${targetUser.id}`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/conversations/${targetUser.id}`, { headers: { Authorization: `Bearer ${token}` } });
       setActiveChat({ targetUser, conversationId: res.data.conversation_id });
     } catch (error) { alert("Error: Could not open chat."); }
   };
@@ -182,7 +182,7 @@ const Dashboard = () => {
     setStatusMessage({ type: 'info', text: 'Saving...' });
     try {
       const token = localStorage.getItem('token');
-      await axios.put('http://localhost:5000/api/profiles/interests', { interests: myProfile.interests }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.put('${import.meta.env.VITE_API_BASE_URL}/api/profiles/interests', { interests: myProfile.interests }, { headers: { Authorization: `Bearer ${token}` } });
       setStatusMessage({ type: 'success', text: "Interests saved successfully." });
     } catch (err: any) { setStatusMessage({ type: 'error', text: err.response?.data?.message || 'Failed to save.' }); }
   };
@@ -190,7 +190,7 @@ const Dashboard = () => {
   const handleRespondInterest = async (interest: InterestRequest, status: 'accepted' | 'rejected') => {
     const token = localStorage.getItem('token');
     try {
-      await axios.put(`http://localhost:5000/api/interests/respond/${interest.interest_id}`, { status }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.put(`${import.meta.env.VITE_API_BASE_URL}/api/interests/respond/${interest.interest_id}`, { status }, { headers: { Authorization: `Bearer ${token}` } });
     } catch (error) { console.error("Failed to respond to interest", error); }
   };
 
@@ -203,7 +203,7 @@ const Dashboard = () => {
           <div className="lg:col-span-1 space-y-8">
             <div className="bg-white rounded-2xl shadow-xl p-6 space-y-6">
               <div className="flex items-center space-x-4 border-b pb-6">
-                {myProfile?.image ? <img src={`http://localhost:5000/${myProfile.image}`} alt="My Profile" className="h-20 w-20 rounded-full object-cover"/> : <UserCircle className="h-20 w-20 text-gray-300" />}
+                {myProfile?.image ? <img src={`${import.meta.env.VITE_API_BASE_URL}/${myProfile.image}`} alt="My Profile" className="h-20 w-20 rounded-full object-cover"/> : <UserCircle className="h-20 w-20 text-gray-300" />}
                 <div>
                   <h2 className="text-xl font-bold text-gray-800">{user?.first_name} {user?.last_name}</h2>
                   <label htmlFor="profile-pic-upload" className="mt-2 text-sm font-semibold text-rose-600 hover:text-rose-700 cursor-pointer">Update Profile Picture</label>
@@ -215,7 +215,7 @@ const Dashboard = () => {
                 <div className="grid grid-cols-3 gap-2 p-2 bg-gray-50 rounded-md min-h-[7rem]">
                   {myProfile?.images.map(img => (
                     <div key={img.image_id} className="relative group aspect-square">
-                      <img src={`http://localhost:5000/${img.image_url}`} alt="Profile Gallery" className="h-full w-full object-cover rounded-md"/>
+                      <img src={`${import.meta.env.VITE_API_BASE_URL}/${img.image_url}`} alt="Profile Gallery" className="h-full w-full object-cover rounded-md"/>
                       <div className="absolute inset-0 bg-black/60 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button title="Set as profile picture" onClick={() => handleSetMainPicture(img.image_url)} className="text-white p-1.5 rounded-full hover:bg-white/20"><Star size={16}/></button>
                         <button title="Delete image" onClick={() => handleDeleteImage(img.image_id)} className="text-white p-1.5 rounded-full hover:bg-white/20"><Trash2 size={16}/></button>
@@ -255,7 +255,7 @@ const Dashboard = () => {
                     {activeTab === 'likes' && receivedLikes.map(like => (
                       <div key={like.user_id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div className="flex items-center gap-3">
-                           {like.image ? <img src={`http://localhost:5000/${like.image}`} alt={like.first_name} className="h-10 w-10 rounded-full object-cover"/> : <UserCircle className="h-10 w-10 text-gray-300"/>}
+                           {like.image ? <img src={`${import.meta.env.VITE_API_BASE_URL}/${like.image}`} alt={like.first_name} className="h-10 w-10 rounded-full object-cover"/> : <UserCircle className="h-10 w-10 text-gray-300"/>}
                            <p><span className="font-semibold">{like.first_name} {like.last_name}</span> liked your profile.</p>
                         </div>
                         <button onClick={() => handleViewProfile(like.user_id)} className="text-sm font-semibold text-blue-600 hover:underline">View Profile</button>
@@ -263,7 +263,7 @@ const Dashboard = () => {
                     ))}
                     {activeTab === 'chats' && acceptedChats.map(chat => (
                       <button key={chat.interest_id} onClick={() => handleOpenChat({ id: chat.user_id, name: `${chat.first_name} ${chat.last_name}`})} className="w-full flex items-center gap-4 p-3 bg-gray-50 rounded-lg text-left hover:bg-rose-50 transition-colors">
-                        {chat.image ? <img src={`http://localhost:5000/${chat.image}`} alt={chat.first_name} className="h-12 w-12 rounded-full object-cover"/> : <UserCircle className="h-12 w-12 text-gray-300"/>}
+                        {chat.image ? <img src={`${import.meta.env.VITE_API_BASE_URL}/${chat.image}`} alt={chat.first_name} className="h-12 w-12 rounded-full object-cover"/> : <UserCircle className="h-12 w-12 text-gray-300"/>}
                         <div>
                           <p className="font-semibold text-gray-800">{chat.first_name} {chat.last_name}</p>
                           <p className="text-sm text-green-600">You can now chat.</p>
