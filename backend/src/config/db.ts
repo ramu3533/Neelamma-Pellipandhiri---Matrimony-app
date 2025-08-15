@@ -11,9 +11,7 @@ const pool = new Pool({
   port: parseInt(process.env.DB_PORT || '5432'),
   connectionString: process.env.DATABASE_URL,
   // SSL is required for production databases on most cloud platforms
-  ssl: {
-    rejectUnauthorized: false
-  }
+  ssl: process.env.NODE_ENV === 'production' 
 });
 
 export default pool;
