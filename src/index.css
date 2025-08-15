@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Maddison&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+/* Custom CSS for Premium User Features */
+
+/* Container for the animated rainbow border */
+.rainbow-border {
+  position: relative;
+  padding: 4px; /* This padding creates the border thickness */
+  border-radius: 9999px; /* This makes it a circle */
+  overflow: hidden;
+  background: linear-gradient(to right, red, orange, rgb(237, 112, 9), green, blue, indigo, violet);
+  background-size: 200% 200%;
+  animation: rainbow-scroll 3s linear infinite;
+}
+
+/* Keyframe animation for the moving gradient */
+@keyframes rainbow-scroll {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Static rainbow gradient text for the header */
+.premium-text-gradient {
+  background: linear-gradient(to right, #ef4444, #df1f55, #e71616, #039338, #3b82f6, #4b0ae3);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+.maddison {
+  font-family: 'Maddison', cursive;
+}
