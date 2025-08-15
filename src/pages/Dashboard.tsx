@@ -212,7 +212,7 @@ const Dashboard = () => {
               <div className="space-y-4">
                 <h3 className="font-semibold text-gray-800 flex items-center gap-2"><Upload size={18}/> Manage Photo Gallery</h3>
                 <div className="grid grid-cols-3 gap-2 p-2 bg-gray-50 rounded-md min-h-[7rem]">
-                  {myProfile?.images.map(img => (
+                  {(myProfile?.images || []).map(img => (
                     <div key={img.image_id} className="relative group aspect-square">
                       <img src={`${import.meta.env.VITE_API_BASE_URL}/${img.image_url}`} alt="Profile Gallery" className="h-full w-full object-cover rounded-md"/>
                       <div className="absolute inset-0 bg-black/60 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -231,7 +231,7 @@ const Dashboard = () => {
               <div className="space-y-3 border-t pt-6">
                 <h3 className="font-semibold text-gray-800 flex items-center gap-2"><Tag size={18}/> Manage Interests</h3>
                 <div className="flex flex-wrap gap-2 min-h-[40px] p-2 bg-gray-50 rounded-md">
-                  {myProfile?.interests.map(interest => (<span key={interest} className="flex items-center bg-gray-200 text-gray-800 text-sm px-3 py-1 rounded-full">{interest} <button onClick={() => handleRemoveInterest(interest)} className="ml-2 text-gray-500 hover:text-gray-800"><X size={14}/></button></span>))}
+                  {(myProfile?.interests || []).map(interest => (<span key={interest} className="flex items-center bg-gray-200 text-gray-800 text-sm px-3 py-1 rounded-full">{interest} <button onClick={() => handleRemoveInterest(interest)} className="ml-2 text-gray-500 hover:text-gray-800"><X size={14}/></button></span>))}
                 </div>
                 <div className="flex gap-2"><input type="text" value={newInterest} onChange={e => setNewInterest(e.target.value)} placeholder="Add a hobby" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500"/><button onClick={handleAddInterest} className="p-2 bg-gray-200 rounded-lg hover:bg-gray-300"><Plus size={20}/></button></div>
                 <button onClick={handleSaveInterests} className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition">Save Interests</button>
