@@ -34,7 +34,7 @@ const OtpVerification = () => {
     const url = purpose === 'register' ? '/api/auth/verify-registration' : '/api/auth/verify-login';
     
     try {
-      const res = await axios.post(`http://localhost:5000${url}`, { email, otp });
+      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}${url}`, { email, otp });
       
       if (purpose === 'register') {
         alert(res.data.message);
