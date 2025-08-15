@@ -48,16 +48,15 @@ const Dashboard = () => {
 
 
   useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    if (searchParams.get('payment_success')) {
-      // If payment was successful, refresh the user's premium status
-      refreshUser().then(() => {
-        // After refreshing, remove the query parameter from the URL for a clean state
-        navigate('/dashboard', { replace: true });
-        alert("Subscription successful! You are now a premium member.");
-      });
-    }
-  }, [user]); 
+  const searchParams = new URLSearchParams(location.search);
+  if (searchParams.get('payment_success')) {
+    refreshUser().then(() => {
+      navigate('/dashboard', { replace: true });
+      alert("Subscription successful! You are now a premium member.");
+    });
+  }
+  // The dependencies should be the functions and objects from outside that the effect uses.
+}, [location.search, refreshUser, navigate]);
   useEffect(() => {
     const fetchData = async () => {
       if (!user) return;
