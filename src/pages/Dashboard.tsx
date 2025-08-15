@@ -57,7 +57,7 @@ const Dashboard = () => {
         alert("Subscription successful! You are now a premium member.");
       });
     }
-  }, []); 
+  }, [user]); 
   useEffect(() => {
     const fetchData = async () => {
       if (!user) return;
