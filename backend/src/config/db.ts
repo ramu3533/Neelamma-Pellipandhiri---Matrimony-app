@@ -2,7 +2,7 @@ import { Pool } from 'pg';
 import dotenv from 'dotenv';
 
 dotenv.config();
-
+const isProduction = process.env.NODE_ENV === 'production';
 const pool = new Pool({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
@@ -11,7 +11,7 @@ const pool = new Pool({
   port: parseInt(process.env.DB_PORT || '5432'),
   connectionString: process.env.DATABASE_URL,
   // SSL is required for production databases on most cloud platforms
-  ssl: process.env.NODE_ENV === 'production' 
+  ssl: isProduction ? { rejectUnauthorized: false } : false
 });
 
 export default pool;
