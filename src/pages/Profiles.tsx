@@ -79,10 +79,10 @@ const Profiles = () => {
       try {
         const [profilesRes, allProfilesRes, sentInterestsRes, sentLikesRes] =
           await Promise.all([
-            axios.get("${import.meta.env.VITE_API_BASE_URL}/api/profiles", config),
-            axios.get("${import.meta.env.VITE_API_BASE_URL}/api/profiles/all", config),
-            axios.get("${import.meta.env.VITE_API_BASE_URL}/api/interests/sent", config),
-            axios.get("${import.meta.env.VITE_API_BASE_URL}/api/likes/sent", config),
+            axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/profiles`, config),
+            axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/profiles/all`, config),
+            axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/interests/sent`, config),
+            axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/likes/sent`, config),
           ]);
 
         // DEFINITIVE FIX: Ensure the current user is filtered out from all lists immediately after fetch.
@@ -201,7 +201,7 @@ const Profiles = () => {
     const token = localStorage.getItem("token");
     try {
       const res = await axios.post<Interest>(
-        "${import.meta.env.VITE_API_BASE_URL}/api/interests/send",
+        `${import.meta.env.VITE_API_BASE_URL}/api/interests/send`,
         { receiverId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
