@@ -195,33 +195,38 @@ io.on('connection', (socket) => {
     console.log(`User ${socket.id} (User ID: ${userId}) joined room ${userId}`);
   });
 
-  socket.on('send_message', async (data) => {
-    try {
-      const { senderId, receiverId, message } = data;
-      const user1 = Math.min(senderId, receiverId);
-      const user2 = Math.max(senderId, receiverId);
-      const convoRes = await pool.query('SELECT conversation_id FROM conversations WHERE user1_id = $1 AND user2_id = $2', [user1, user2]);
       
-      if (convoRes.rows.length > 0) {
-        const conversationId = convoRes.rows[0].conversation_id;
-        
-        const messageRes = await pool.query(
-          'INSERT INTO messages (conversation_id, sender_id, receiver_id, message_text) VALUES ($1, $2, $3, $4) RETURNING message_id, conversation_id, sender_id, receiver_id, message_text as message, created_at, is_read', 
-          [conversationId, senderId, receiverId, message]
-        );
-        const newMessage = messageRes.rows[0];
+socket.on('send_message', async (data) => {
+  try {
+    // We now receive conversationId directly from the frontend
+    const { senderId, receiverId, message, conversationId } = data;
 
-        io.to(receiverId.toString()).emit('receive_message', newMessage);
-        io.to(senderId.toString()).emit('receive_message', newMessage);
-        
-        const senderRes = await pool.query('SELECT first_name FROM users WHERE user_id = $1', [senderId]);
-        io.to(receiverId.toString()).emit('new_message_notification', {
-          senderName: senderRes.rows[0].first_name,
-          message: newMessage.message,
-        });
-      }
-    } catch (error) { console.error("Failed to save or send message:", error); }
-  });
+    if (!conversationId) {
+      console.error("Error: conversationId is missing in send_message event.");
+      return; // Stop execution if no conversationId is provided
+    }
+    
+    // Insert message into the database and get the full new message back
+    const messageRes = await pool.query(
+      'INSERT INTO messages (conversation_id, sender_id, receiver_id, message_text) VALUES ($1, $2, $3, $4) RETURNING message_id, conversation_id, sender_id, receiver_id, message_text as message, created_at, is_read', 
+      [conversationId, senderId, receiverId, message]
+    );
+    const newMessage = messageRes.rows[0];
+
+    // Emit the full message object to both users' rooms
+    io.to(receiverId.toString()).emit('receive_message', newMessage);
+    io.to(senderId.toString()).emit('receive_message', newMessage);
+    
+    // Also send a specific notification for push notifications
+    const senderRes = await pool.query('SELECT first_name FROM users WHERE user_id = $1', [senderId]);
+    io.to(receiverId.toString()).emit('new_message_notification', {
+      senderName: senderRes.rows[0].first_name,
+      message: newMessage.message,
+    });
+  } catch (error) { 
+    console.error("Failed to save or send message:", error); 
+  }
+});
 
   socket.on('mark_as_read', async (data) => {
     try {
