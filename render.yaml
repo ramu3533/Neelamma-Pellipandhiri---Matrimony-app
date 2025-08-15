@@ -1,0 +1,69 @@
+# This is a Render Blueprint that defines all services for the Matrimony App.
+# Find and replace placeholders like [YOUR_STRIPE_KEY] with your actual secrets.
+
+services:
+  # 1. The PostgreSQL Database Service
+  - type: psql
+    name: matrimony-db
+    plan: free # Use the free tier for the database
+
+  # 2. The Backend API Service
+  - type: web
+    name: matrimony-backend
+    plan: free # Use the free tier for the web service
+    runtime: node
+    # Tell Render where the backend code is
+    rootDir: ./backend
+    # Commands for Render to run
+    buildCommand: npm install && npm run build
+    startCommand: node dist/server.js
+    # Environment variables for the backend
+    envVars:
+      # Render automatically creates and injects the DATABASE_URL from the matrimony-db service above.
+      # So you DO NOT need to add DB_HOST, DB_USER, etc.
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true # Let Render generate a secure random string
+      - key: STRIPE_SECRET_KEY
+        # It's better to add sensitive keys directly in the Render UI as a "Secret File".
+        # For now, you can sync it or add it here, but UI is safer.
+        value: [YOUR_STRIPE_SECRET_KEY]
+      - key: STRIPE_WEBHOOK_SECRET
+        value: [YOUR_STRIPE_WEBHOOK_SECRET]
+      # Email credentials
+      - key: EMAIL_HOST
+        value: smtp.gmail.com
+      - key: EMAIL_PORT
+        value: 587
+      - key: EMAIL_USER
+        value: neelammapellipandiri@gmail.com
+      - key: EMAIL_PASS
+        value: brgi iwmf wjgn kbcs
+      # This special variable gets the public URL of our frontend service (defined below)
+      # and sets it for CORS.
+      - key: FRONTEND_URL
+        fromService:
+          type: dynamic
+          name: matrimony-frontend
+          property: url
+
+  # 3. The Frontend Static Site Service
+  - type: dynamic
+    name: matrimony-frontend
+    plan: free # Use the free tier for the static site
+    # Tell Render where the frontend code is
+    rootDir: ./src
+    # Commands for Render to run
+    buildCommand: npm install && npm run build
+    # Where the final static files are located after the build
+    publishDir: ./dist
+    # Environment variable for the frontend
+    # This gets the public URL of our backend service (defined above)
+    # and makes it available to the Vite build process.
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: matrimony-backend
+          property: url
