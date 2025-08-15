@@ -21,7 +21,7 @@ const Contact = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/api/contact', formData);
+      const res = await axios.post('${import.meta.env.VITE_API_BASE_URL}/api/contact', formData);
       console.log('Contact form submitted:', res.data);
       // Handle form submission, e.g., show a success message
       alert('Your message has been sent successfully!');
