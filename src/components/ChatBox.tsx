@@ -114,7 +114,6 @@ const ChatBox = ({ conversationId, targetUser, onBack }: ChatBoxProps) => {
       senderId: user.user_id,
       receiverId: targetUser.id,
       message: newMessage,
-      conversationId: conversationId 
     };
       socket.emit('send_message', messageData);
       setNewMessage('');
