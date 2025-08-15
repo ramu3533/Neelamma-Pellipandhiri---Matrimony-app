@@ -20,7 +20,7 @@ const SuccessStories = () => {
   useEffect(() => {
     const fetchSuccessStories = async () => {
       try {
-        const res = await axios.get<Story[]>('http://localhost:5000/api/success-stories');
+        const res = await axios.get<Story[]>('${import.meta.env.VITE_API_BASE_URL}/api/success-stories');
         setStories(res.data);
       } catch (error) {
         console.error('Error fetching success stories:', error);
