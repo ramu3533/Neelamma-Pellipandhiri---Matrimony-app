@@ -136,6 +136,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import http from 'http';
+import fs from 'fs';
+import { promisify } from 'util';
 import { Server } from 'socket.io';
 import pool from './config/db';
 
@@ -148,6 +150,11 @@ import conversationRoutes from './routes/conversationRoutes';
 import messageRoutes from './routes/messageRoutes';
 import likeRoutes from './routes/likeRoutes';
 import stripeRoutes from './routes/stripeRoutes';
+
+const uploadsDir = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
 dotenv.config();
 
