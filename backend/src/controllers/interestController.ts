@@ -181,13 +181,21 @@ export const respondToInterest = async (req: AuthRequest, res: Response) => {
       await client.query(`INSERT INTO conversations (user1_id, user2_id) VALUES ($1, $2) ON CONFLICT (user1_id, user2_id) DO NOTHING`, [Math.min(sender_id, receiver_id), Math.max(sender_id, receiver_id)]);
     }
     await client.query('COMMIT');
-    const responder = await client.query('SELECT first_name FROM users WHERE user_id = $1', [currentUserId]);
-    const responderName = responder.rows[0].first_name;
-    io.to(sender_id.toString()).emit('interest_response', { message: `${responderName} has ${status} your interest request.` });
-    const updatedInterestForSender = { ...updatedInterest, user_id: receiver_id };
-    const updatedInterestForReceiver = { ...updatedInterest, user_id: sender_id };
-    io.to(sender_id.toString()).emit('interest_status_updated', updatedInterestForSender);
-    io.to(receiver_id.toString()).emit('interest_status_updated', updatedInterestForReceiver);
+    if (io) {
+  const responder = await client.query('SELECT first_name FROM users WHERE user_id = $1', [currentUserId]);
+  const responderName = responder.rows[0].first_name;
+  
+  // Notify the original sender of the response
+  io.to(sender_id.toString()).emit('interest_response', { 
+    message: `${responderName} has ${status} your interest request.` 
+  });
+  
+  // Send a real-time update to both users so their UI can refresh
+  const updatedInterestForSender = { ...updatedInterest, user_id: receiver_id };
+  const updatedInterestForReceiver = { ...updatedInterest, user_id: sender_id };
+  io.to(sender_id.toString()).emit('interest_status_updated', updatedInterestForSender);
+  io.to(receiver_id.toString()).emit('interest_status_updated', updatedInterestForReceiver);
+}
     res.json(updatedInterest);
   } catch (error) {
     await client.query('ROLLBACK');
