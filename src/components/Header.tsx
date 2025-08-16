@@ -20,7 +20,7 @@ const Header = () => {
           const token = localStorage.getItem("token");
           const config = { headers: { Authorization: `Bearer ${token}` } };
           const res = await axios.get(
-            "http://localhost:5000/api/interests/received",
+            `${import.meta.env.VITE_API_BASE_URL}/api/interests/received`,
             config
           );
           const pending = res.data.filter(
