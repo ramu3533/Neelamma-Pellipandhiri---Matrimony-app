@@ -78,14 +78,14 @@ const ProfileCardModal = ({ profile, onClose }: ModalProps) => {
           {hasGalleryImages ? (
             // 1. If gallery exists, show the carousel
             <img
-              src={`http://localhost:5000/${profile.images[currentImageIndex].image_url}`}
+              src={`${import.meta.env.VITE_API_BASE_URL}/${profile.images[currentImageIndex].image_url}`}
               alt={profile.name}
               className="w-full object-contain rounded-t-2xl"
             />
           ) : profile.image ? (
             // 2. Else, if main profile picture exists, show it as a static image
             <img
-              src={`http://localhost:5000/${profile.image}`}
+              src={`${import.meta.env.VITE_API_BASE_URL}/${profile.image}`}
               alt={profile.name}
               className="w-full object-contain rounded-t-2xl"
             />
