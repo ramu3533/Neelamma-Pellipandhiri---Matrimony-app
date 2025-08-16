@@ -38,47 +38,53 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const { user } = useAuth();
 
-  useEffect(() => {
-     if(user && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
-        Notification.requestPermission();
+  // THIS IS THE CORRECT REPLACEMENT BLOCK
+useEffect(() => {
+  // If the user is not logged in, there is nothing to do.
+  if (!user) {
+    // If a socket connection already exists, disconnect it.
+    if (socket) {
+      socket.close();
+      setSocket(null);
     }
-    if (user) {
-      // Establish connection when user logs in
-      const newSocket = io(import.meta.env.VITE_API_BASE_URL, {
-          transports: ['websocket'] // Explicitly use websockets for better reliability
-      });
-      setSocket(newSocket);
+    return;
+  }
 
-      // Join a personal room for notifications
-      newSocket.emit('join_room', user.user_id);
+  // --- THIS IS THE CRITICAL CONNECTION LOGIC ---
+  // Connect to the backend using the environment variable.
+  const newSocket = io(import.meta.env.VITE_API_BASE_URL, {
+    // Force WebSocket transport for reliability on cloud platforms.
+    transports: ['websocket'],
+    // Ensure authentication token is sent if needed in the future.
+    withCredentials: true,
+  });
 
-      // Listen for notifications
-      newSocket.on('new_interest_request', (data) => {
-          alert(data.message); // Simple alert for now
-      });
+  setSocket(newSocket);
 
-      newSocket.on('interest_response', (data) => {
-          alert(data.message); // Simple alert for now
-      });
-      newSocket.on('new_message_notification', (data) => {
-          showNotification(`New Message from ${data.senderName}`, {
-              body: data.message,
-              icon: '/favicon.ico' // Optional: path to an icon
-          });
-      });
+  // Join the user-specific room for notifications.
+  newSocket.emit('join_room', user.user_id);
 
-      // Cleanup on logout
-      return () => {
-        newSocket.close();
-      };
-    } else {
-      // If there's no user, disconnect
-      if (socket) {
-        socket.close();
-        setSocket(null);
-      }
-    }
-  }, [user]);
+  // --- Notification Listeners (Push Notifications, etc.) ---
+  newSocket.on('new_interest_request', (data) => {
+    showNotification('New Interest!', { body: data.message });
+  });
+
+  newSocket.on('interest_response', (data) => {
+    showNotification('Interest Response', { body: data.message });
+  });
+  
+  newSocket.on('new_message_notification', (data) => {
+    showNotification(`New Message from ${data.senderName}`, {
+      body: data.message,
+      icon: '/favicon.ico'
+    });
+  });
+
+  // Cleanup function to run when the component unmounts or user changes.
+  return () => {
+    newSocket.close();
+  };
+}, [user]); // This effect ONLY re-runs when the user logs in or out.
 
   return (
     <SocketContext.Provider value={{ socket }}>
