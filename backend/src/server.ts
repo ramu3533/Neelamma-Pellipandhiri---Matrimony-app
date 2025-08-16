@@ -3,10 +3,10 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import http from 'http';
-import fs from 'fs';
-import { promisify } from 'util';
 import { Server } from 'socket.io';
 import pool from './config/db';
+import fs from 'fs';
+import { promisify } from 'util';
 
 import authRoutes from './routes/authRoutes';
 import profileRoutes from './routes/profileRoutes';
@@ -30,11 +30,10 @@ const server = http.createServer(app);
 const allowedOrigins = [
   'http://localhost:5173', // Your local frontend
   process.env.FRONTEND_URL  // Your deployed Vercel frontend URL from .env
-].filter(Boolean); // filter(Boolean) removes any falsy values like an empty string
+].filter(Boolean); 
 
 const corsOptions = {
-  origin: function (origin, callback) {
-    // allow requests with no origin (like mobile apps or curl requests)
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
@@ -42,12 +41,19 @@ const corsOptions = {
     }
   },
   methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true // Important for some advanced cases
+  credentials: true 
 };
-app.use(cors(corsOptions));
+
+app.use(cors({
+  origin: process.env.FRONTEND_URL, 
+  methods: ["GET", "POST", "PUT", "DELETE"],
+}));
 
 const io = new Server(server, {
-  cors: corsOptions
+  cors: {
+    origin: process.env.FRONTEND_URL,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  }
 });
 app.use(express.json());
 
@@ -76,7 +82,6 @@ io.on('connection', (socket) => {
     console.log(`User ${socket.id} (User ID: ${userId}) joined room ${userId}`);
   });
 
-      
 // THIS IS THE CORRECT REPLACEMENT BLOCK
 socket.on('send_message', async (data) => {
   try {
@@ -149,8 +154,12 @@ socket.on('send_message', async (data) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`Server with Socket.IO running on port ${PORT}`));
+const PORT = parseInt(process.env.PORT || '5000', 10);
+const HOST = '0.0.0.0'; // Explicitly listen on all network interfaces
+
+server.listen(Number(PORT), HOST, () => {
+  console.log(`Server with Socket.IO running on http://${HOST}:${PORT}`);
+});
 
 declare global {
   namespace Express {
