@@ -52,7 +52,7 @@ const Login = () => {
     <div
       className="py-20 min-h-screen flex items-center justify-center bg-cover bg-center"
       style={{
-        backgroundImage: "url('src/wedding.jpg')",
+        backgroundImage: "url('wedding.jpg')",
       }}
     >
       <div className="max-w-md w-full mx-auto px-4 sm:px-6 lg:px-8">
