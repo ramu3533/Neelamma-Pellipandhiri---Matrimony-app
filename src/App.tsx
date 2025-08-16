@@ -50,13 +50,13 @@
 
 // export default App;
 
-// In your main router file (e.g., demo/src/App.tsx)
-import React, { Suspense } from 'react'; // <-- Import Suspense
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import { AuthProvider } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
+import ProtectedRoute from './components/ProtectedRoute'; // Import the gatekeeper component
 
 // --- LAZY LOAD YOUR PAGES ---
 const Home = React.lazy(() => import('./pages/Home'));
@@ -83,18 +83,25 @@ function App() {
         <SocketProvider>
           <Header />
           <main>
-            {/* --- WRAP ROUTES IN SUSPENSE --- */}
             <Suspense fallback={<LoadingSpinner />}>
               <Routes>
+                {/* --- Public Routes --- */}
+                {/* These are accessible to everyone. */}
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/verify-otp" element={<OtpVerification />} />
-                <Route path="/profiles" element={<Profiles />} />
                 <Route path="/success-stories" element={<SuccessStories />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
-                <Route path="/dashboard" element={<Dashboard />} />
+
+                {/* --- Protected Routes --- */}
+                {/* These are only accessible if the user is logged in. */}
+                {/* The ProtectedRoute component acts as a wrapper. */}
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/profiles" element={<Profiles />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                </Route>
               </Routes>
             </Suspense>
           </main>
