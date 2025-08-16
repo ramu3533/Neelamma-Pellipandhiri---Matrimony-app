@@ -48,7 +48,7 @@ const ChatBox = ({ conversationId, targetUser, onBack }: ChatBoxProps) => {
       if (!user) return;
       const token = localStorage.getItem('token');
       try {
-        const res = await axios.get(`http://localhost:5000/api/messages/${conversationId}`, {
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/messages/${conversationId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setMessages(res.data);
