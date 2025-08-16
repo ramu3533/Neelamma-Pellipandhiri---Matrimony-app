@@ -233,9 +233,7 @@ const Dashboard = () => {
                 <div className="flex flex-wrap gap-2 min-h-[40px] p-2 bg-gray-50 rounded-md">
                   {(myProfile?.interests || []).map(interest => (<span key={interest} className="flex items-center bg-gray-200 text-gray-800 text-sm px-3 py-1 rounded-full">{interest} <button onClick={() => handleRemoveInterest(interest)} className="ml-2 text-gray-500 hover:text-gray-800"><X size={14}/></button></span>))}
                 </div>
-                <div className="flex gap-2"><input type="text" value={newInterest} onChange={e => setNewInterest(e.target.value)} placeholder="Add a hobby" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500"/><button onClick={handleAddInterest} className="p-2 bg-gray-200 rounded-lg hover:bg-gray-300"><Plus size={20}/></button></div>
-                <button onClick={handleSaveInterests} className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition">Save Interests</button>
-              </div>
+                <div className="flex gap-2"><input type="text" name="newInterest" value={newInterest} onChange={e => setNewInterest(e.target.value)} placeholder="Add a hobby" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500"/><button onClick={handleAddInterest} className="p-2 bg-gray-200 rounded-lg hover:bg-gray-300"><Plus size={20}/></button></div>
               {statusMessage.text && <p className={`text-sm text-center font-medium ${statusMessage.type === 'error' ? 'text-red-600' : 'text-green-600'}`}>{statusMessage.text}</p>}
             </div>
           </div>
