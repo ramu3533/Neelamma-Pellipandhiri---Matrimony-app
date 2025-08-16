@@ -431,7 +431,7 @@ const Dashboard = () => {
                   <Upload size={18} /> Manage Photo Gallery
                 </h3>
                 <div className="grid grid-cols-3 gap-2 p-2 bg-gray-50 rounded-md min-h-[7rem]">
-                  {myProfile?.images.map((img) => (
+                  {(myProfile?.images || []).map((img) => (
                     <div
                       key={img.image_id}
                       className="relative group aspect-square"
@@ -491,7 +491,7 @@ const Dashboard = () => {
                   <Tag size={18} /> Manage Interests
                 </h3>
                 <div className="flex flex-wrap gap-2 min-h-[40px] p-2 bg-gray-50 rounded-md">
-                  {myProfile?.interests.map((interest) => (
+                  {(myProfile?.interests || []).map(interest => (
                     <span
                       key={interest}
                       className="flex items-center bg-gray-200 text-gray-800 text-sm px-3 py-1 rounded-full"
