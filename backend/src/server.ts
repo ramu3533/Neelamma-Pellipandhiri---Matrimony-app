@@ -81,40 +81,51 @@ io.on('connection', (socket) => {
     console.log(`User ${socket.id} (User ID: ${userId}) joined room ${userId}`);
   });
 
-// THIS IS THE CORRECT REPLACEMENT BLOCK
 socket.on('send_message', async (data) => {
   try {
     const { senderId, receiverId, message } = data;
-
-    // The backend correctly finds the conversation ID itself.
     const user1 = Math.min(senderId, receiverId);
     const user2 = Math.max(senderId, receiverId);
-    const convoRes = await pool.query('SELECT conversation_id FROM conversations WHERE user1_id = $1 AND user2_id = $2', [user1, user2]);
-    
-    // Proceed only if a conversation exists between the two users.
-    if (convoRes.rows.length > 0) {
-      const conversationId = convoRes.rows[0].conversation_id;
-      
-      // Insert the message and return the newly created row.
-      const messageRes = await pool.query(
-        'INSERT INTO messages (conversation_id, sender_id, receiver_id, message_text) VALUES ($1, $2, $3, $4) RETURNING message_id, conversation_id, sender_id, receiver_id, message_text as message, created_at, is_read', 
-        [conversationId, senderId, receiverId, message]
-      );
-      const newMessage = messageRes.rows[0];
 
-      // Emit the full message object back to both users.
-      io.to(receiverId.toString()).emit('receive_message', newMessage);
-      io.to(senderId.toString()).emit('receive_message', newMessage);
-      
-      // Send a specific notification for push notifications.
-      const senderRes = await pool.query('SELECT first_name FROM users WHERE user_id = $1', [senderId]);
-      io.to(receiverId.toString()).emit('new_message_notification', {
-        senderName: senderRes.rows[0].first_name,
-        message: newMessage.message,
-      });
-    } else {
-      console.error(`No conversation found between users ${senderId} and ${receiverId}.`);
+    // --- THIS IS THE CRITICAL FIX ---
+    // Step 1: Ensure the conversation exists using "INSERT ... ON CONFLICT".
+    // This command attempts to create the conversation. If it already exists,
+    // it does nothing, but it guarantees the row is there for the next step.
+    await pool.query(
+      'INSERT INTO conversations (user1_id, user2_id) VALUES ($1, $2) ON CONFLICT (user1_id, user2_id) DO NOTHING',
+      [user1, user2]
+    );
+
+    // Step 2: Now that we are GUARANTEED the conversation exists, securely fetch its ID.
+    const convoRes = await pool.query(
+      'SELECT conversation_id FROM conversations WHERE user1_id = $1 AND user2_id = $2',
+      [user1, user2]
+    );
+    
+    // This check ensures we have the ID before proceeding.
+    if (convoRes.rows.length === 0) {
+        throw new Error(`Database error: Could not find or create conversation for users ${user1} and ${user2}`);
     }
+    const conversationId = convoRes.rows[0].conversation_id;
+      
+    // Step 3: With the guaranteed conversationId, insert the message.
+    const messageRes = await pool.query(
+      'INSERT INTO messages (conversation_id, sender_id, receiver_id, message_text) VALUES ($1, $2, $3, $4) RETURNING message_id, conversation_id, sender_id, receiver_id, message_text as message, created_at, is_read', 
+      [conversationId, senderId, receiverId, message]
+    );
+    const newMessage = messageRes.rows[0];
+
+    // Step 4: Emit the new message back to both users.
+    io.to(receiverId.toString()).emit('receive_message', newMessage);
+    io.to(senderId.toString()).emit('receive_message', newMessage);
+    
+    // Step 5: Send a push notification.
+    const senderRes = await pool.query('SELECT first_name FROM users WHERE user_id = $1', [senderId]);
+    io.to(receiverId.toString()).emit('new_message_notification', {
+      senderName: senderRes.rows[0].first_name,
+      message: newMessage.message,
+    });
+
   } catch (error) { 
     console.error("Failed to save or send message:", error); 
   }
