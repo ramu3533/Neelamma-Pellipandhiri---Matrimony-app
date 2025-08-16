@@ -27,32 +27,28 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 const allowedOrigins = [
-  'http://localhost:5173', // Your local frontend
-  process.env.FRONTEND_URL  // Your deployed Vercel frontend URL from .env
-].filter(Boolean); 
+  'http://localhost:5173',
+  process.env.FRONTEND_URL
+].filter(Boolean); // This ensures no empty values are in the array
 
 const corsOptions = {
   origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    // Allow requests with no origin (like Postman/curl) or from our whitelist.
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error('This origin is not allowed by CORS'));
     }
   },
   methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true 
+  credentials: true
 };
 
-app.use(cors({
-  origin: process.env.FRONTEND_URL, 
-  methods: ["GET", "POST", "PUT", "DELETE"],
-}));
+// --- Apply the SAME CORS configuration to both Express and Socket.IO ---
+app.use(cors(corsOptions));
 
 const io = new Server(server, {
-  cors: {
-    origin: process.env.FRONTEND_URL,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-  }
+  cors: corsOptions
 });
 app.use(express.json());
 
