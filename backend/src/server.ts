@@ -7,7 +7,6 @@ import { Server } from 'socket.io';
 import pool from './config/db';
 import fs from 'fs';
 import { promisify } from 'util';
-
 import authRoutes from './routes/authRoutes';
 import profileRoutes from './routes/profileRoutes';
 import successStoryRoutes from './routes/successStoryRoutes';
