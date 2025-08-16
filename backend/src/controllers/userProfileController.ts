@@ -176,23 +176,42 @@ export const deleteProfileImage = async (req: AuthRequest, res: Response) => {
     }
 };
 
-// Update the user's interests
+// THIS IS THE DEFINITIVE REPLACEMENT FUNCTION
 export const updateProfileInterests = async (req: AuthRequest, res: Response) => {
   const userId = req.user?.id;
-  const { interests } = req.body;
-
-  if (!Array.isArray(interests)) {
-    return res.status(400).json({ message: 'Interests must be an array of strings.' });
-  }
+  // We expect req.body to be { interests: [...] }
+  let { interests } = req.body; 
 
   try {
+    // --- THIS IS THE CRITICAL FIX ---
+    // Defensively check the type of 'interests'. If it's a string, parse it.
+    // This handles cases where middleware or other processes might stringify the array.
+    if (typeof interests === 'string') {
+      try {
+        interests = JSON.parse(interests);
+      } catch (e) {
+        return res.status(400).json({ message: 'Interests string is not valid JSON.' });
+      }
+    }
+
+    // Now, perform the validation check on the (potentially parsed) interests.
+    if (!Array.isArray(interests)) {
+      return res.status(400).json({ message: 'Interests must be an array of strings.' });
+    }
+
+    // The 'pg' driver correctly handles JS arrays. Pass it directly.
     await pool.query(
       'UPDATE profiles SET interests = $1 WHERE user_id = $2',
       [interests, userId]
     );
+    
     res.status(200).json({ message: 'Interests updated successfully' });
   } catch (error) {
     console.error("Failed to update interests", error);
+    // Add more detailed logging for debugging if needed
+    if (error instanceof Error) {
+        console.error("Error details:", error.message);
+    }
     res.status(500).json({ message: 'Server error' });
   }
 };
