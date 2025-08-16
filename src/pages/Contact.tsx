@@ -10,6 +10,7 @@ const Contact = () => {
     subject: '',
     message: '',
   });
+  
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
@@ -18,6 +19,7 @@ const Contact = () => {
     });
   };
 
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
